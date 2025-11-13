@@ -5,17 +5,20 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct Node{
+typedef struct Node Node;
+typedef struct LinkedList LinkedList;
+
+struct Node{
     Node *previous;
     void *data;
     Node *next;
-} Node;
+};
 
-typedef struct LinkedList{
+struct LinkedList{
     Node *head;
     Node *tail;
     int node_amount;
-} LinkedList;
+};
 
 
 LinkedList *linked_list_create();

@@ -104,7 +104,7 @@ int linked_list_clean(LinkedList *list){
 }
 
 int node_destroy_chain(LinkedList *list, Node *node){
-    if (node->next) node_destroy_recursive(list, node->next);
+    if (node->next) node_destroy_chain(list, node->next);
     free(node->data);
     free(node);
     list->node_amount--;

@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -Iinclude
 
-SRC_DIR = scr
+SRC_DIR = src
 OBJ_DIR = obj
 LIB_DIR = lib
 
