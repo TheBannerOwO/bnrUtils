@@ -4,7 +4,7 @@
 LinkedList *linked_list_create(){
 
     LinkedList *list = calloc(1, sizeof(LinkedList));
-    if (list == NULL) exit(EXIT_FAILURE);
+    if (!list) return NULL;
 
     return list;
 }
@@ -13,10 +13,10 @@ LinkedList *linked_list_create(){
 Node *node_create(void *data, size_t data_size){
 
     Node *node = calloc(1, sizeof(Node));
-    if (node == NULL) exit(EXIT_FAILURE);
+    if (!node) return NULL;
 
     node->data = malloc(data_size);
-    if (node->data == NULL) exit(EXIT_FAILURE);
+    if (!node->data) return NULL;
 
     memcpy(node->data, data, data_size);
 
