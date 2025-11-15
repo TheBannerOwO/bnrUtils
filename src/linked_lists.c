@@ -1,4 +1,5 @@
 #include "linked_lists.h"
+#include "common_utils.h"
 
 
 LinkedList *linked_list_create(){
@@ -11,6 +12,8 @@ LinkedList *linked_list_create(){
 
 
 Node *node_create(void *data, size_t data_size){
+
+    if (data_size <= 0 || !data) return RES_INVALIDPARAM;
 
     Node *node = calloc(1, sizeof(Node));
     if (!node) return NULL;
@@ -25,6 +28,9 @@ Node *node_create(void *data, size_t data_size){
 
 
 int linked_list_append(LinkedList* list, void *data, size_t data_size){
+
+    if (data_size <= 0 || !list || !data) return RES_INVALIDPARAM;
+
     Node *node = node_create(data, data_size);
 
     if (!list->head){
@@ -36,10 +42,14 @@ int linked_list_append(LinkedList* list, void *data, size_t data_size){
     }
 
     list->node_amount++;
-    return 0;
+    return RES_SUCCESS;
 }
 
+
 int linked_list_prepend(LinkedList* list, void *data, size_t data_size){
+
+    if (data_size <= 0 || !list || !data) return RES_INVALIDPARAM;
+
     Node *node = node_create(data, data_size);
 
     if (!list->tail) {
@@ -51,12 +61,13 @@ int linked_list_prepend(LinkedList* list, void *data, size_t data_size){
     }
 
     list->node_amount++;
-    return 0;
+    return RES_SUCCESS;
 }
+
 
 Node *linked_list_get(LinkedList *list, int index){
 
-    if (list->node_amount == 0) return NULL;
+    if (!list || list->node_amount == 0) return NULL;
     Node *node;
 
     if (index >= 0){
@@ -81,32 +92,85 @@ Node *linked_list_get(LinkedList *list, int index){
     return node;
 }
 
+
 int linked_list_destroy(LinkedList *list){
-    if(!list->node_amount){
+    if (!list) return RES_INVALIDPARAM;
+
+    if (!list->node_amount){
         free(list);
-        return 0;
+        return RES_SUCCESS;
     }
 
-    Node *tail = list->tail;
-    node_destroy_chain(list, tail);
+    node_list_destroy(list);
     free(list);
 
-    return 0;
+    return RES_SUCCESS;
 }
+
 
 int linked_list_clean(LinkedList *list){
-    if(!list->node_amount) return 0;
+    if (!list) return RES_INVALIDPARAM;
+    if (!list->node_amount) return RES_SUCCESS;
 
-    Node *tail = list->tail;
-
-    node_destroy_chain(list, tail);
-    return 0;
+    node_list_destroy(list);
+    return RES_SUCCESS;
 }
 
-int node_destroy_chain(LinkedList *list, Node *node){
-    if (node->next) node_destroy_chain(list, node->next);
+
+int node_list_destroy(LinkedList *list){
+
+    if (!list->node_amount || 
+        !list->tail || 
+        !list->head ||
+        !list) return RES_INVALIDPARAM;
+
+    Node *node = list->tail;
+
+    // Detaching node chain from list
+    list->tail = NULL;
+    list->head = NULL;
+    list->node_amount = 0;
+
+    for (int i = 0; i < list->node_amount; i++){
+        free(node->data);
+
+        if (node->next) {
+            node = node->next;
+            free(node->previous);
+        } else {
+            free(node);
+        }
+    }
+
+    // OLD RECURSIVE IMPLEMENTATION
+    // if (node->next) node_list_destroy(list, node->next);
+    // free(node->data);
+    // free(node);
+
+    return RES_SUCCESS;
+}
+
+
+int linked_list_get_destroy(LinkedList *list, int index){
+
+    if (!list) return RES_INVALIDPARAM;
+
+    Node *node = linked_list_get(list, index);
+
+    if (node->previous && node->next) {
+        // Dont break the chain
+        node->previous->next = node->next;
+        node->next->previous = node->previous;
+    } else if (!node->previous) {
+        list->tail = node->next;
+    } else if (!node->next) {
+        list->head = node->previous;
+    } else {
+        return RES_UNKNOWN;
+    }
+
     free(node->data);
     free(node);
-    list->node_amount--;
-    return 0;
+
+    return RES_SUCCESS;
 }

@@ -29,8 +29,8 @@ int linked_list_append(LinkedList *list, void *data, size_t data_size);
 int linked_list_prepend(LinkedList *list, void *data, size_t data_size);
 int linked_list_destroy(LinkedList *list);
 int linked_list_clean(LinkedList *list);
-int node_destroy_chain(LinkedList *list, Node *node);
-
+int node_list_destroy(LinkedList *list);
+int node_destroy(Node *node);
 
 
 /*
