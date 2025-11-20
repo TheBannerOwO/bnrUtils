@@ -22,6 +22,9 @@ Node *node_create(void *data, size_t data_size){
     Node *node = calloc(1, sizeof(Node));
     if (!node) return NULL;
 
+    node->next = NULL;
+    node->previous = NULL;
+
     node->data = malloc(data_size);
     if (!node->data) return NULL;
 
@@ -31,16 +34,18 @@ Node *node_create(void *data, size_t data_size){
 }
 
 
-int linked_list_append(LinkedList* list, void *data, size_t data_size){
+int linked_list_append(LinkedList *list, void *data, size_t data_size){
 
     if (data_size <= 0 || !list || !data) return RES_INVALIDPARAM;
 
     Node *node = node_create(data, data_size);
 
+    
     if (!list->head){
         list->head = node;
         list->tail = node;
     } else {
+        node->previous = list->head;
         list->head->next = node;
         list->head = node;
     }
@@ -50,16 +55,18 @@ int linked_list_append(LinkedList* list, void *data, size_t data_size){
 }
 
 
-int linked_list_prepend(LinkedList* list, void *data, size_t data_size){
+int linked_list_prepend(LinkedList *list, void *data, size_t data_size){
 
     if (data_size <= 0 || !list || !data) return RES_INVALIDPARAM;
 
     Node *node = node_create(data, data_size);
 
+    
     if (!list->tail) {
         list->head = node;
         list->tail = node;
     } else {
+        node->next = list->tail;
         list->tail->previous = node;
         list->tail = node;
     }
