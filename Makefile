@@ -4,10 +4,12 @@ TESTFLAGS = -L$(LIB_DIR)/ -l$(LIBNAME)
 VALFLAGS = --leak-check=full --show-reachable=yes --track-origins=yes
 
 LIBNAME = BnrDatastructures
+DEST = ~/mylibs/
 
 SRC_DIR = src
 OBJ_DIR = obj
 LIB_DIR = lib
+INC_DIR = include
 TES_DIR = tests
 
 SOURCES = $(wildcard $(SRC_DIR)/*.c)
@@ -18,6 +20,8 @@ TEST_SOURCES = $(wildcard $(TES_DIR)/*.c)
 TEST_EXECS = $(TEST_SOURCES:$(TES_DIR)/%.c=$(TES_DIR)/%.out)
 
 all: $(LIBRARY) $(TEST_EXECS)
+
+rebuild: clean all
 
 library: $(LIBRARY)
 
@@ -32,6 +36,8 @@ $(TES_DIR)/%.out: $(TES_DIR)/%.c | $(LIBRARY)
 
 $(LIBRARY): $(OBJECTS) | $(LIB_DIR)
 	@ar rcs $@ $^
+	@cp -a $@ $(DEST)
+	@cp $(INC_DIR)/*.h /usr/include/myheaders/
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -43,4 +49,4 @@ $(LIB_DIR):
 	@mkdir -p $(LIB_DIR)
 
 
-.PHONY: all clean library tests
+.PHONY: all clean library tests rebuild

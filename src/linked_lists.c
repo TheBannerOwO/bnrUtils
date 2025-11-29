@@ -1,6 +1,8 @@
 #include "linked_lists.h"
 #include "common_utils.h"
 
+int node_list_destroy(LinkedList *list);
+
 LinkedList *linked_list_create() {
 
   LinkedList *list = malloc(sizeof(LinkedList));

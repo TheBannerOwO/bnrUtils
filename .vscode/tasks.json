@@ -32,30 +32,19 @@
         {
             "type": "shell",
             "label": "format all C files",
-            "command": "find",
+            "command": "bash",
             "args": [
-                ".",
-                "-name",
-                "\"*.c\"",
-                "-o",
-                "-name",
-                "\"*.h\"",
-                "|",
-                "xargs",
-                "clang-format",
-                "-i"
+                "${workspaceFolder}/format.sh"
             ],
             "group": {
                 "kind": "build",
                 "isDefault": true
             },
             "presentation": {
-                "echo": true,
-                "reveal": "always",
+                "echo": false,
+                "reveal": "never",
                 "focus": false,
-                "panel": "shared",
-                "showReuseMessage": true,
-                "clear": false
+                "clear": true
             }
         }
     ],

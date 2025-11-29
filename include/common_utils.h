@@ -1,6 +1,11 @@
-#ifndef CMMN_UTILS
-#define CMMN_UTILS
+#ifndef COMMON_UTILS
+#define COMMON_UTILS
 
+/**
+ * Enum for the function exit status
+ *
+ * @enum FuncStatus
+ */
 typedef enum {
   RES_SUCCESS = 0,
   RES_MEMERR,
