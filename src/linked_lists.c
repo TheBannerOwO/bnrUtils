@@ -1,13 +1,13 @@
 #include "linked_lists.h"
 #include "common_utils.h"
 
-int node_list_destroy(LinkedList *list);
+// RAII
+// Simplified list to contain only ints.
 
 LinkedList *linked_list_create() {
 
   LinkedList *list = malloc(sizeof(LinkedList));
-  if (!list)
-    return NULL;
+  if (!list) return NULL;
 
   list->head = NULL;
   list->tail = NULL;
@@ -16,77 +16,28 @@ LinkedList *linked_list_create() {
   return list;
 }
 
-Node *node_create(void *data, size_t data_size) {
+Node *node_create(int data) {
 
-  if (data_size <= 0 || !data)
-    return NULL;
-
-  Node *node = calloc(1, sizeof(Node));
-  if (!node)
-    return NULL;
+  Node *node = malloc(sizeof(Node));
+  if (!node) return NULL;
 
   node->next = NULL;
   node->previous = NULL;
 
-  node->data = malloc(data_size);
-  if (!node->data)
-    return NULL;
-
-  memcpy(node->data, data, data_size);
+  node->data = data;
 
   return node;
 }
 
-int linked_list_append(LinkedList *list, void *data, size_t data_size) {
-
-  if (data_size <= 0 || !list || !data)
-    return RES_INVALIDPARAM;
-
-  Node *node = node_create(data, data_size);
-
-  if (!list->head) {
-    list->head = node;
-    list->tail = node;
-  } else {
-    node->previous = list->head;
-    list->head->next = node;
-    list->head = node;
-  }
-
-  list->node_amount++;
-  return RES_SUCCESS;
-}
-
-int linked_list_prepend(LinkedList *list, void *data, size_t data_size) {
-
-  if (data_size <= 0 || !list || !data)
-    return RES_INVALIDPARAM;
-
-  Node *node = node_create(data, data_size);
-
-  if (!list->tail) {
-    list->head = node;
-    list->tail = node;
-  } else {
-    node->next = list->tail;
-    list->tail->previous = node;
-    list->tail = node;
-  }
-
-  list->node_amount++;
-  return RES_SUCCESS;
-}
-
 Node *linked_list_get(LinkedList *list, int index) {
 
-  if (!list || list->node_amount == 0)
-    return NULL;
+  if (!list || list->node_amount == 0) return NULL;
+
   Node *node;
-
   if (index >= 0) {
-    if (index > list->node_amount - 1)
-      return NULL;
+    if (index > list->node_amount - 1) return NULL;
 
+    // Back -> front
     node = list->tail;
 
     for (int i = 0; i < index; i++) {
@@ -94,9 +45,9 @@ Node *linked_list_get(LinkedList *list, int index) {
     }
   } else {
     index = (-1 * index) - 1;
-    if (index > list->node_amount - 1)
-      return NULL;
+    if (index > list->node_amount - 1) return NULL;
 
+    // Front -> back
     node = list->head;
 
     for (int i = 0; i < index; i++) {
@@ -107,72 +58,99 @@ Node *linked_list_get(LinkedList *list, int index) {
   return node;
 }
 
-int linked_list_destroy(LinkedList *list) {
-  if (!list)
-    return RES_INVALIDPARAM;
+int linked_list_insert(LinkedList *list, int index, int data) {
 
-  if (!list->node_amount) {
-    free(list);
-    return RES_SUCCESS;
+  if (!list) return RES_INVALIDPARAM;
+
+  if (index == 0) return linked_list_prepend(list, data);
+
+  Node *newNode = node_create(data);
+  if (newNode == NULL) return RES_INTERNALERR;
+
+  Node *oldNode = linked_list_get(list, index);
+  if (oldNode == NULL) return RES_INTERNALERR;
+
+  Node *previousNode = oldNode->previous;
+  previousNode->next = newNode;
+  newNode->previous = previousNode;
+
+  newNode->next = oldNode;
+  oldNode->previous = newNode;
+
+  list->node_amount++;
+  return RES_SUCCESS;
+}
+
+int linked_list_append(LinkedList *list, int data) {
+
+  if (!list) return RES_INVALIDPARAM;
+
+  Node *node = node_create(data);
+
+  if (list->node_amount == 0) {
+    list->head = node;
+    list->tail = node;
+  } else if (list->head) {
+    node->previous = list->head;
+    list->head->next = node;
+    list->head = node;
+  } else {
+    return RES_UNKNOWN;
   }
 
-  node_list_destroy(list);
-  free(list);
+  list->node_amount++;
+  return RES_SUCCESS;
+}
 
+int linked_list_prepend(LinkedList *list, int data) {
+
+  if (!list) return RES_INVALIDPARAM;
+
+  Node *node = node_create(data);
+
+  if (list->node_amount == 0) {
+    list->head = node;
+    list->tail = node;
+  } else if (list->tail) {
+    node->next = list->tail;
+    list->tail->previous = node;
+    list->tail = node;
+  } else {
+    return RES_UNKNOWN;
+  }
+
+  list->node_amount++;
   return RES_SUCCESS;
 }
 
 int linked_list_clean(LinkedList *list) {
-  if (!list)
-    return RES_INVALIDPARAM;
-  if (!list->node_amount)
-    return RES_SUCCESS;
 
-  node_list_destroy(list);
-  return RES_SUCCESS;
-}
-
-int node_list_destroy(LinkedList *list) {
-
-  if (!list->node_amount || !list->tail || !list->head || !list)
-    return RES_INVALIDPARAM;
+  if (!list) return RES_INVALIDPARAM;
+  if (list->node_amount == 0) return RES_SUCCESS;
 
   Node *node = list->tail;
 
-  // Detaching node chain from list
   list->tail = NULL;
   list->head = NULL;
-
-  for (int i = 0; i < list->node_amount; i++) {
-    free(node->data);
-
-    if (node->next) {
-      node = node->next;
-      free(node->previous);
-    } else {
-      free(node);
-    }
-  }
-
   list->node_amount = 0;
 
-  // OLD RECURSIVE IMPLEMENTATION
-  // if (node->next) node_list_destroy(list, node->next);
-  // free(node->data);
-  // free(node);
+  while (node->next) {
+    node = node->next;
+    free(node->previous);
+  }
+  free(node);
 
   return RES_SUCCESS;
 }
 
 int linked_list_get_destroy(LinkedList *list, int index) {
 
-  if (!list)
-    return RES_INVALIDPARAM;
+  if (!list) return RES_INVALIDPARAM;
 
   Node *node = linked_list_get(list, index);
+  if (!node) return RES_INTERNALERR;
 
   if (node->previous && node->next) {
-    // Dont break the chain
     node->previous->next = node->next;
     node->next->previous = node->previous;
   } else if (!node->previous) {
@@ -183,8 +161,23 @@ int linked_list_get_destroy(LinkedList *list, int index) {
     return RES_UNKNOWN;
   }
 
-  free(node->data);
   free(node);
+
+  return RES_SUCCESS;
+}
+
+int linked_list_print(LinkedList *list) {
+  if (!list) return RES_INVALIDPARAM;
+
+  Node *node = list->tail;
+  if (!node) return RES_INTERNALERR;
+
+  printf("[");
+  while (node->next) {
+    printf("%d, ", node->data);
+    node = node->next;
+  }
+  printf("%d]\n", node->data);
 
   return RES_SUCCESS;
 }

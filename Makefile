@@ -32,7 +32,7 @@ clean:
 
 $(TES_DIR)/%.out: $(TES_DIR)/%.c | $(LIBRARY)
 	$(CC) $(CFLAGS) $< $(TESTFLAGS) -o $@
-	valgrind $(VALFLAGS) --log-file="$@.log" $@
+	@valgrind $(VALFLAGS) --log-file="$@.log" $@
 
 $(LIBRARY): $(OBJECTS) | $(LIB_DIR)
 	@ar rcs $@ $^

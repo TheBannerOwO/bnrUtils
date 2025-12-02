@@ -6,3 +6,4 @@ SeparateDefinitionBlocks: Always
 BreakBeforeBraces: Attach
 ColumnLimit: 80
 PointerAlignment: Right
+AllowShortIfStatementsOnASingleLine: Always
