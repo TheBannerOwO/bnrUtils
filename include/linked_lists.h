@@ -105,11 +105,5 @@ int linked_list_clean(LinkedList *list);
  * @return function exit status
  */
 int linked_list_print(LinkedList *list);
-/*
-TODOs...
-
-int linked_list_healtcheck(LinkedList *list);
-
-*/
 
 #endif
